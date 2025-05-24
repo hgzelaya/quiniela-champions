@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Quiniela Champions</title>
+    
+    <!-- Google APIs -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            min-height: 500px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .user-setup {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f8fafc;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.6);
+        }
+        
+        .match-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .match-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .match-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .team {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .vs {
+            margin: 0 20px;
+            font-size: 18px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .predictions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .prediction-input {
+            width: 60px;
+            height: 50px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .prediction-input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .leaderboard {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+        }
+        
+        .leaderboard-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .leaderboard-item:first-of-type {
+            background: #fff3e0;
+        }
+        
+        .position {
+            font-weight: bold;
+            font-size: 18px;
+            color: #667eea;
+            min-width: 40px;
+        }
+        
+        .participant-name {
+            flex: 1;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+        
+        .points {
+            font-weight: bold;
+            font-size: 18px;
+            color: #28a745;
+        }
+        
+        .admin-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-upcoming { background: #e3f2fd; color: #1976d2; }
+        .status-live { background: #e8f5e8; color: #2e7d32; }
+        .status-finished { background: #fafafa; color: #616161; }
+        .status-closed { background: #fff3e0; color: #f57c00; }
+        
+        .admin-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .admin-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .admin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .admin-btn:hover::before {
+            left: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tab {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+            
+            .teams {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .predictions {
+                justify-content: center;
+            }
+            
+            .match-card {
+                padding: 20px;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Quiniela Champions</h1>
+            <p>Predice los resultados y gana puntos</p>
+            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; border-left: 4px solid #28a745;">
+                <strong>✅ CONFIGURADA CON GOOGLE SHEETS:</strong> Datos guardados automáticamente y sincronizados.
+                <br>📊 <a href="#" id="sheetLink" target="_blank" style="color: #007bff;">Ver hoja de cálculo</a>
+            </div>
+            <div id="connectionStatus" style="text-align: center; margin-top: 10px; font-size: 12px;">
+                🔄 Inicializando...
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('predictions')">Predicciones</div>
+            <div class="nav-tab" onclick="switchTab('leaderboard')">Posiciones</div>
+            <div class="nav-tab" onclick="switchTab('admin')">👑 Admin</div>
+        </div>
+
+        <!-- Tab: Predicciones -->
+        <div id="predictions" class="tab-content active">
+            <div id="userSetup" class="user-setup">
+                <h3>🎯 Únete a la Quiniela</h3>
+                <p style="margin-bottom: 30px; color: #666;">Ingresa tu código único y nombre para comenzar</p>
+                
+                <div class="form-group">
+                    <label for="userCode">Código único (ej: TU123):</label>
+                    <input type="text" id="userCode" placeholder="Crea un código único" maxlength="10">
+                </div>
+                
+                <div class="form-group">
+                    <label for="userName">Tu nombre:</label>
+                    <input type="text" id="userName" placeholder="Como aparecerás en la tabla">
+                </div>
+                
+                <button class="btn" onclick="registerUser()">🚀 Comenzar Quiniela</button>
+                <div id="userAlert"></div>
+            </div>
+            
+            <div id="predictionsContainer" style="display: none;">
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; border-left: 4px solid #28a745;">
+                    <strong>👋 Hola <span id="currentUserName"></span>!</strong>
+                    <br>Haz tus predicciones antes de que inicien los partidos
+                    <button onclick="logoutUser()" style="background: none; border: none; color: #dc3545; cursor: pointer; margin-left: 15px;">🚪 Cambiar usuario</button>
+                </div>
+                
+                <div id="matchesContainer">
+                    <!-- Los partidos se cargarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Tabla de Posiciones -->
+        <div id="leaderboard" class="tab-content">
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <h3>🏆 Tabla de Posiciones</h3>
+                    <p>Ranking actualizado en tiempo real</p>
+                </div>
+                <div id="leaderboardContainer">
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <p>📊 Los resultados aparecerán aquí una vez que haya predicciones</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Admin -->
+        <div id="admin" class="tab-content">
+            <div id="adminLogin" class="admin-panel">
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                        <h3 style="margin: 0 0 15px 0; font-size: 24px;">👑 Panel de Administración</h3>
+                        <p style="margin: 0; opacity: 0.9; font-size: 16px;">Acceso exclusivo para el administrador de la quiniela</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: left;">
+                        <h4 style="color: #333; margin-bottom: 15px;">🔐 ¿Para qué necesitas autenticarte?</h4>
+                        <div style="display: grid; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: #e3f2fd; color: #1976d2; padding: 5px 8px; border-radius: 50%; font-size: 12px;">⚽</span>
+                                <span>Agregar y gestionar partidos</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: #e8f5e8; color: #2e7d32; padding: 5px 8px; border-radius: 50%; font-size: 12px;">📁</span>
+                                <span>Importar partidos desde CSV</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: #fff3e0; color: #f57c00; padding: 5px 8px; border-radius: 50%; font-size: 12px;">📊</span>
+                                <span>Actualizar resultados</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: #fce4ec; color: #c2185b; padding: 5px 8px; border-radius: 50%; font-size: 12px;">☁️</span>
+                                <span>Sincronizar con Google Sheets</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="admin-btn" onclick="adminLogin()">
+                        🔑 Autenticar con Google
+                    </button>
+                    
+                    <div style="margin-top: 20px; font-size: 14px; color: #666;">
+                        <p>🔒 <strong>Seguro y privado:</strong> Solo tú tendrás acceso administrativo</p>
+                        <p>⚡ <strong>Una sola vez:</strong> Tu sesión se recordará mientras uses la app</p>
+                    </div>
+                </div>
+                <div id="adminAlert"></div>
+            </div>
+            
+            <div id="adminPanel" style="display: none;">
+                <div class="admin-panel">
+                    <div style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 20px;">👑 Panel de Administración</h3>
+                            <p style="margin: 5px 0 0 0; opacity: 0.9;">Sesión activa como administrador</p>
+                        </div>
+                        <button onclick="adminLogout()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            🚪 Cerrar Sesión
+                        </button>
+                    </div>
+                    
+                    <!-- Inicializar Google Sheets -->
+                    <div class="match-card">
+                        <h4>📊 Configuración Inicial</h4>
+                        <p style="color: #666; margin-bottom: 15px;">Solo necesario la primera vez o si cambias de Google Sheet</p>
+                        <button class="btn btn-secondary" onclick="initializeSheetStructure()">📊 Inicializar Google Sheets</button>
+                    </div>
+                    
+                    <!-- Importar CSV -->
+                    <div class="match-card">
+                        <h4>📁 Importar Partidos desde CSV</h4>
+                        <div class="form-group">
+                            <label for="csvFile">Seleccionar archivo CSV:</label>
+                            <input type="file" id="csvFile" accept=".csv" style="width: 100%; padding: 10px; border: 2px dashed #667eea; border-radius: 8px; background: #f8fafc;">
+                        </div>
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0; font-size: 14px;">
+                            <strong>📋 Formato del CSV:</strong><br>
+                            <code>jornada,equipo_local,equipo_visitante,fecha,tipo</code><br>
+                            <strong>Ejemplo:</strong><br>
+                            <code>Cuartos de Final,BARCELONA,REAL MADRID,2025-06-15 20:00,eliminacion</code><br>
+                            <small><em>* Fecha: YYYY-MM-DD HH:MM (obligatoria)</em></small><br>
+                            <small><em>* Tipo: "eliminacion" o "regular"</em></small>
+                        </div>
+                        <button class="btn" onclick="importFromCSV()">📥 Importar Partidos</button>
+                        <button class="btn btn-secondary" onclick="downloadTemplate()">📄 Descargar Plantilla</button>
+                    </div>
+                    
+                    <!-- Agregar partido manual -->
+                    <div class="match-card">
+                        <h4>➕ Agregar Nuevo Partido</h4>
+                        <div class="form-group">
+                            <label for="newJornada">Jornada:</label>
+                            <input type="text" id="newJornada" placeholder="ej: Cuartos de Final - Ida">
+                        </div>
+                        <div class="form-group">
+                            <label for="newTeamHome">Equipo Local:</label>
+                            <input type="text" id="newTeamHome" placeholder="ej: BARCELONA">
+                        </div>
+                        <div class="form-group">
+                            <label for="newTeamAway">Equipo Visitante:</label>
+                            <input type="text" id="newTeamAway" placeholder="ej: REAL MADRID">
+                        </div>
+                        <div class="form-group">
+                            <label for="newMatchDate">Fecha y Hora *:</label>
+                            <input type="datetime-local" id="newMatchDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newMatchType">Tipo de Partido:</label>
+                            <select id="newMatchType" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; background: #f8fafc;">
+                                <option value="regular">Regular (Liga/Grupo)</option>
+                                <option value="eliminacion">Eliminación (Knockout)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="addNewMatch()">➕ Agregar Partido</button>
+                    </div>
+                    
+                    <!-- Gestión de partidos existentes -->
+                    <div class="match-card">
+                        <h4>📋 Partidos Programados</h4>
+                        <div id="matchesList">
+                            <!-- Los partidos se cargarán aquí -->
+                        </div>
+                    </div>
+                    
+                    <!-- Actualizar resultados -->
+                    <div class="match-card">
+                        <h4>📊 Actualizar Resultados</h4>
+                        <div id="adminMatchesList">
+                            <!-- Los partidos para actualizar resultados -->
+                        </div>
+                        <button class="btn" onclick="updateAllResults()">📊 Guardar Todos los Resultados</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de la quiniela
+        let participants = {};
+        let matches = {};
+        let matchCounter = 0;
+        let currentUser = '';
+        let isAdmin = false;
+        
+        // Configuración Google Sheets API (HARDCODEADA)
+        const API_KEY = 'AIzaSyCzrMb7uMRqVgOlaMx_mc8ezWOtiqWA-98';
+        const CLIENT_ID = '126009607273-v5olctaf5if59il231bcmhd6nebssfgh.apps.googleusercontent.com';
+        const SPREADSHEET_ID = '1f_pR0mH8qtLTmknFa1YWofXe64bfr0dCLh5_DbzjPs0';
+        
+        let gapi_loaded = false;
+        let gis_loaded = false;
+        let sheets_connected = false;
+        
+        const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+        
+        let tokenClient;
+        let gapi_inited = false;
+        let gis_inited = false;
+
+        // Cargar Google API con verificación
+        function gapiLoaded() {
+            console.log('GAPI loaded');
+            gapi_loaded = true;
+            updateConnectionStatus('🔄 Google API cargada...', '#ffc107');
+            maybeEnableButtons();
+        }
+        
+        function gisLoaded() {
+            console.log('GIS loaded');
+            gis_loaded = true;
+            updateConnectionStatus('🔄 APIs cargadas. Conectando automáticamente...', '#ffc107');
+            maybeEnableButtons();
+        }
+        
+        function maybeEnableButtons() {
+            if (gapi_loaded && gis_loaded) {
+                updateConnectionStatus('🔄 Conectando a Google Sheets...', '#ffc107');
+                autoConnectToSheets();
+            }
+        }
+        
+        // Conexión automática a Google Sheets
+        async function autoConnectToSheets() {
+            try {
+                updateConnectionStatus('🔄 Inicializando conexión...', '#ffc107');
+                
+                // Esperar a que gapi esté completamente cargado
+                await new Promise((resolve, reject) => {
+                    gapi.load('client', {
+                        callback: resolve,
+                        onerror: reject
+                    });
+                });
+                
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: [DISCOVERY_DOC],
+                });
+                
+                gapi_inited = true;
+                sheets_connected = true;
+                updateConnectionStatus('✅ Conectado a Google Sheets', '#28a745');
+                document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`;
+                
+                // Cargar datos automáticamente
+                loadDataFromSheets();
+                
+            } catch (error) {
+                console.error('Error en conexión automática:', error);
+                updateConnectionStatus('⚠️ Conexión parcial - Funciones limitadas', '#ffc107');
+                // Cargar partidos de ejemplo si no se puede conectar
+                initializeDefaultMatches();
+                refreshMatchesDisplay();
+            }
+        }
+        
+        // Login de administrador
+        async function adminLogin() {
+            if (!gapi_loaded || !gis_loaded) {
+                showAlert('adminAlert', 'APIs aún cargando. Espera unos segundos.', 'error');
+                return;
+            }
+            
+            try {
+                updateConnectionStatus('🔄 Autenticando administrador...', '#ffc107');
+                
+                // Inicializar token client si no existe
+                if (!tokenClient) {
+                    tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        callback: (resp) => {
+                            if (resp.error !== undefined) {
+                                showAlert('adminAlert', `Error de autenticación: ${resp.error}`, 'error');
+                                return;
+                            }
+                            
+                            isAdmin = true;
+                            gis_inited = true;
+                            showAdminPanel();
+                            showAlert('adminAlert', '✅ Autenticado exitosamente como administrador', 'success');
+                            updateConnectionStatus('✅ Admin autenticado', '#28a745');
+                        },
+                    });
+                }
+                
+                // Solicitar autorización
+                if (gapi.client.getToken() === null) {
+                    tokenClient.requestAccessToken({prompt: 'consent'});
+                } else {
+                    tokenClient.requestAccessToken({prompt: ''});
+                }
+                
+            } catch (error) {
+                console.error('Error en login admin:', error);
+                showAlert('adminAlert', `Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Mostrar panel de administrador
+        function showAdminPanel() {
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            
+            // Cargar datos para admin
+            updateMatchesList();
+            updateAdminResultsDisplay();
+        }
+        
+        // Logout de administrador
+        function adminLogout() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token);
+                gapi.client.setToken('');
+            }
+            
+            isAdmin = false;
+            gis_inited = false;
+            
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            
+            // Cambiar a tab de predicciones
+            switchTab('predictions');
+            
+            showAlert('adminAlert', 'Sesión de administrador cerrada', 'success');
+        }
+
+        // Funciones de Google Sheets (simplificadas)
+        async function writeToSheet(range, values) {
+            if (!gis_inited) {
+                showAlert('adminAlert', 'Debes autenticarte como administrador primero', 'error');
+                return false;
+            }
+            
+            try {
+                const request = {
+                    spreadsheetId: SPREADSHEET_ID,
+                    range: range,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: values
+                    }
+                };
+                
+                const response = await gapi.client.sheets.spreadsheets.values.update(request);
+                return response.result;
+            } catch (error) {
+                console.error('Error escribiendo en sheet:', error);
+                showAlert('adminAlert', 'Error guardando en Google Sheets. Verifica permisos.', 'error');
+                return false;
+            }
+        }
+
+        async function readFromSheet(range) {
+            if (!sheets_connected) {
+                return null;
+            }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: SPREADSHEET_ID,
+                    range: range,
+                });
+                return response.result.values || [];
+            } catch (error) {
+                console.error('Error leyendo sheet:', error);
+                return null;
+            }
+        }
+
+        // Cambiar tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'leaderboard') {
+                updateLeaderboard();
+            } else if (tabName === 'admin') {
+                if (isAdmin) {
+                    updateMatchesList();
+                    updateAdminResultsDisplay();
+                }
+            }
+        }
+
+        // Gestión de usuarios
+        function registerUser() {
+            const code = document.getElementById('userCode').value.trim().toUpperCase();
+            const name = document.getElementById('userName').value.trim();
+            
+            if (!code || !name) {
+                showAlert('userAlert', 'Por favor completa ambos campos', 'error');
+                return;
+            }
+            
+            if (code.length < 3) {
+                showAlert('userAlert', 'El código debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+            
+            if (participants[code] && participants[code].name !== name) {
+                showAlert('userAlert', 'Este código ya está ocupado por otro usuario', 'error');
+                return;
+            }
+            
+            // Registrar usuario
+            participants[code] = {
+                name: name,
+                points: 0,
+                predictions: {}
+            };
+            
+            currentUser = code;
+            
+            // Mostrar interfaz de predicciones
+            document.getElementById('userSetup').style.display = 'none';
+            document.getElementById('predictionsContainer').style.display = 'block';
+            document.getElementById('currentUserName').textContent = name;
+            
+            showAlert('userAlert', `¡Bienvenido ${name}! Ya puedes hacer tus predicciones`, 'success');
+            updatePredictionsDisplay();
+            
+            // Guardar en Google Sheets si está conectado
+            saveParticipantToSheets(code, name);
+        }
+
+        function logoutUser() {
+            currentUser = '';
+            document.getElementById('userSetup').style.display = 'block';
+            document.getElementById('predictionsContainer').style.display = 'none';
+            document.getElementById('userCode').value = '';
+            document.getElementById('userName').value = '';
+        }
+
+        // Gestión de partidos
+        function addMatch(jornada, homeTeam, awayTeam, date, type = 'regular') {
+            const matchId = ++matchCounter;
+            matches[matchId] = {
+                id: matchId,
+                jornada: jornada,
+                homeTeam: homeTeam,
+                awayTeam: awayTeam,
+                date: date,
+                type: type,
+                homeScore: null,
+                awayScore: null,
+                extraTime: false,
+                status: 'upcoming' // upcoming, live, finished, closed
+            };
+            
+            // Guardar en Google Sheets si está conectado
+            saveMatchToSheets(matchId);
+            
+            return matchId;
+        }
+
+        // Agregar nuevo partido desde el formulario (solo admin)
+        function addNewMatch() {
+            if (!isAdmin) {
+                showAlert('adminAlert', 'Solo administradores pueden agregar partidos', 'error');
+                return;
+            }
+            
+            const jornada = document.getElementById('newJornada').value.trim();
+            const homeTeam = document.getElementById('newTeamHome').value.trim().toUpperCase();
+            const awayTeam = document.getElementById('newTeamAway').value.trim().toUpperCase();
+            const matchDate = document.getElementById('newMatchDate').value;
+            const matchType = document.getElementById('newMatchType').value;
+            
+            if (!jornada || !homeTeam || !awayTeam || !matchDate) {
+                showAlert('adminAlert', 'Por favor completa todos los campos obligatorios', 'error');
+                return;
+            }
+            
+            // Validar que la fecha no sea en el pasado
+            const now = new Date();
+            const gameTime = new Date(matchDate);
+            if (gameTime <= now) {
+                showAlert('adminAlert', 'La fecha del partido debe ser futura', 'error');
+                return;
+            }
+            
+            addMatch(jornada, homeTeam, awayTeam, matchDate, matchType);
+            
+            // Limpiar formulario
+            document.getElementById('newJornada').value = '';
+            document.getElementById('newTeamHome').value = '';
+            document.getElementById('newTeamAway').value = '';
+            document.getElementById('newMatchDate').value = '';
+            document.getElementById('newMatchType').value = 'regular';
+            
+            showAlert('adminAlert', '¡Partido agregado exitosamente!', 'success');
+            refreshMatchesDisplay();
+        }
+
+        // Importar partidos desde CSV (solo admin)
+        function importFromCSV() {
+            if (!isAdmin) {
+                showAlert('adminAlert', 'Solo administradores pueden importar partidos', 'error');
+                return;
+            }
+            
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('adminAlert', 'Por favor selecciona un archivo CSV', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvText = e.target.result;
+                    const lines = csvText.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length === 0) {
+                        showAlert('adminAlert', 'El archivo CSV está vacío', 'error');
+                        return;
+                    }
+                    
+                    let importedCount = 0;
+                    let errors = [];
+                    
+                    // Detectar si tiene encabezados
+                    const firstLine = lines[0].toLowerCase();
+                    let startIndex = 0;
+                    if (firstLine.includes('jornada') || firstLine.includes('equipo') || firstLine.includes('local')) {
+                        startIndex = 1; // Saltar encabezados
+                    }
+                    
+                    for (let i = startIndex; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        
+                        const columns = parseCSVLine(line);
+                        
+                        if (columns.length < 4) {
+                            errors.push(`Línea ${i + 1}: Faltan columnas (mínimo 4 requeridas: jornada, local, visitante, fecha)`);
+                            continue;
+                        }
+                        
+                        const jornada = columns[0].trim();
+                        const equipoLocal = columns[1].trim().toUpperCase();
+                        const equipoVisitante = columns[2].trim().toUpperCase();
+                        const fecha = columns[3].trim();
+                        const tipo = columns[4] ? columns[4].trim().toLowerCase() : 'regular';
+                        
+                        if (!jornada || !equipoLocal || !equipoVisitante || !fecha) {
+                            errors.push(`Línea ${i + 1}: Campos obligatorios vacíos (jornada, equipos y fecha son requeridos)`);
+                            continue;
+                        }
+                        
+                        // Validar tipo
+                        if (tipo !== 'regular' && tipo !== 'eliminacion') {
+                            errors.push(`Línea ${i + 1}: Tipo inválido '${tipo}' (use 'regular' o 'eliminacion')`);
+                            continue;
+                        }
+                        
+                        // Validar y convertir fecha
+                        const fechaValida = parseDate(fecha);
+                        if (!fechaValida) {
+                            errors.push(`Línea ${i + 1}: Formato de fecha inválido '${fecha}' (use YYYY-MM-DD HH:MM)`);
+                            continue;
+                        }
+                        
+                        // Validar que la fecha sea futura
+                        const now = new Date();
+                        const gameTime = new Date(fechaValida);
+                        if (gameTime <= now) {
+                            errors.push(`Línea ${i + 1}: La fecha debe ser futura`);
+                            continue;
+                        }
+                        
+                        addMatch(jornada, equipoLocal, equipoVisitante, fechaValida, tipo);
+                        importedCount++;
+                    }
+                    
+                    // Mostrar resultados
+                    let message = `✅ ${importedCount} partidos importados exitosamente`;
+                    if (errors.length > 0) {
+                        message += `\n⚠️ ${errors.length} errores encontrados:\n${errors.slice(0, 3).join('\n')}`;
+                        if (errors.length > 3) {
+                            message += `\n... y ${errors.length - 3} errores más`;
+                        }
+                    }
+                    
+                    showAlert('adminAlert', message, importedCount > 0 ? 'success' : 'error');
+                    
+                    if (importedCount > 0) {
+                        refreshMatchesDisplay();
+                        // Limpiar input file
+                        fileInput.value = '';
+                    }
+                    
+                } catch (error) {
+                    showAlert('adminAlert', `Error al procesar el archivo: ${error.message}`, 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Inicializar estructura de Google Sheets (solo admin)
+        async function initializeSheetStructure() {
+            if (!isAdmin) {
+                showAlert('adminAlert', 'Solo administradores pueden inicializar Google Sheets', 'error');
+                return;
+            }
+            
+            if (!gis_inited) {
+                showAlert('adminAlert', 'Debes autenticarte primero como administrador', 'error');
+                return;
+            }
+            
+            try {
+                // Crear encabezados para cada hoja
+                await writeToSheet('Participantes!A1:D1', [['Codigo', 'Nombre', 'Puntos', 'Ultima_Actualizacion']]);
+                await writeToSheet('Partidos!A1:I1', [['ID', 'Jornada', 'Equipo_Local', 'Equipo_Visitante', 'Fecha', 'Tipo', 'Resultado_Local', 'Resultado_Visitante', 'Alargue']]);
+                await writeToSheet('Predicciones!A1:E1', [['Codigo_Participante', 'Match_ID', 'Pred_Local', 'Pred_Visitante', 'Pred_Alargue']]);
+                
+                showAlert('adminAlert', '✅ Estructura de Google Sheets inicializada correctamente', 'success');
+            } catch (error) {
+                showAlert('adminAlert', 'Error inicializando estructura. Verifica que tengas permisos de edición en el Google Sheet.', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Funciones auxiliares
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        current += '"';
+                        i++; // Skip next quote
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        function parseDate(dateStr) {
+            // Intentar múltiples formatos de fecha
+            const formats = [
+                /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, // YYYY-MM-DD HH:MM
+                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, // YYYY-MM-DDTHH:MM
+                /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/ // DD/MM/YYYY HH:MM
+            ];
+            
+            for (let format of formats) {
+                if (format.test(dateStr.trim())) {
+                    const date = new Date(dateStr.replace('/', '-'));
+                    if (!isNaN(date.getTime())) {
+                        return dateStr.replace('T', ' ');
+                    }
+                }
+            }
+            return null;
+        }
+
+        function downloadTemplate() {
+            const csvContent = `jornada,equipo_local,equipo_visitante,fecha,tipo
+Cuartos de Final - Ida,BARCELONA,REAL MADRID,2025-06-15 20:00,eliminacion
+Cuartos de Final - Ida,ATLETICO MADRID,MANCHESTER CITY,2025-06-16 20:00,eliminacion
+Cuartos de Final - Vuelta,REAL MADRID,BARCELONA,2025-06-22 20:00,eliminacion
+Cuartos de Final - Vuelta,MANCHESTER CITY,ATLETICO MADRID,2025-06-23 20:00,eliminacion`;
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'plantilla_partidos.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Actualizar displays
+        function updatePredictionsDisplay() {
+            if (!currentUser) return;
+            
+            const container = document.getElementById('matchesContainer');
+            if (!container) return;
+            
+            const matchesArray = Object.values(matches).sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (matchesArray.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>📅 No hay partidos programados</h3>
+                        <p>Los partidos aparecerán aquí una vez que el administrador los configure</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            matchesArray.forEach(match => {
+                const now = new Date();
+                const gameTime = new Date(match.date);
+                const canPredict = gameTime > now && match.status === 'upcoming';
+                const userPrediction = participants[currentUser].predictions[match.id];
+                
+                let statusBadge = '';
+                let statusClass = '';
+                
+                if (match.status === 'finished') {
+                    statusBadge = 'Finalizado';
+                    statusClass = 'status-finished';
+                } else if (match.status === 'live') {
+                    statusBadge = 'En Vivo';
+                    statusClass = 'status-live';
+                } else if (!canPredict) {
+                    statusBadge = 'Cerrado';
+                    statusClass = 'status-closed';
+                } else {
+                    statusBadge = 'Próximo';
+                    statusClass = 'status-upcoming';
+                }
+                
+                html += `
+                    <div class="match-item">
+                        <div class="match-header">
+                            <div>
+                                <strong>${match.jornada}</strong>
+                                <span class="status-badge ${statusClass}">${statusBadge}</span>
+                                ${match.type === 'eliminacion' ? '<span style="background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 10px; font-size: 11px; margin-left: 10px;">ELIMINACIÓN</span>' : ''}
+                            </div>
+                            <div style="font-size: 14px; color: #666;">
+                                ${new Date(match.date).toLocaleString()}
+                            </div>
+                        </div>
+                        
+                        <div class="teams">
+                            <div class="team">${match.homeTeam}</div>
+                            <div class="vs">VS</div>
+                            <div class="team">${match.awayTeam}</div>
+                        </div>
+                        
+                        ${match.status === 'finished' && match.homeScore !== null ? `
+                            <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>Resultado Final: ${match.homeScore} - ${match.awayScore}</strong>
+                                ${match.extraTime ? ' <span style="color: #ff9800;">(Alargue)</span>' : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="predictions">
+                            ${canPredict ? `
+                                <input type="number" class="prediction-input" placeholder="0" min="0" max="20" 
+                                       value="${userPrediction ? userPrediction.homeScore : ''}"
+                                       onchange="savePrediction(${match.id}, 'home', this.value)">
+                                <span style="font-weight: bold; color: #667eea;">-</span>
+                                <input type="number" class="prediction-input" placeholder="0" min="0" max="20"
+                                       value="${userPrediction ? userPrediction.awayScore : ''}"
+                                       onchange="savePrediction(${match.id}, 'away', this.value)">
+                                ${match.type === 'eliminacion' ? `
+                                    <label style="margin-left: 15px;">
+                                        <input type="checkbox" ${userPrediction && userPrediction.extraTime ? 'checked' : ''}
+                                               onchange="savePrediction(${match.id}, 'extraTime', this.checked)">
+                                        Alargue
+                                    </label>
+                                ` : ''}
+                            ` : `
+                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px; width: 100%;">
+                                    ${userPrediction ? `
+                                        <strong>Tu predicción: ${userPrediction.homeScore} - ${userPrediction.awayScore}</strong>
+                                        ${userPrediction.extraTime ? ' <span style="color: #ff9800;">(Alargue)</span>' : ''}
+                                    ` : '<em>No hiciste predicción para este partido</em>'}
+                                </div>
+                            `}
+                        </div>
+                        
+                        ${match.status === 'finished' && userPrediction ? `
+                            <div style="text-align: center; margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 8px;">
+                                <strong>Puntos obtenidos: ${calculateMatchPoints(match, userPrediction)}</strong>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateLeaderboard() {
+            const container = document.getElementById('leaderboardContainer');
+            if (!container) return;
+            
+            // Calcular puntos totales para cada participante
+            const leaderboard = Object.entries(participants).map(([code, participant]) => {
+                let totalPoints = 0;
+                
+                Object.values(matches).forEach(match => {
+                    if (match.status === 'finished' && participant.predictions[match.id]) {
+                        totalPoints += calculateMatchPoints(match, participant.predictions[match.id]);
+                    }
+                });
+                
+                return {
+                    code: code,
+                    name: participant.name,
+                    points: totalPoints
+                };
+            });
+            
+            // Ordenar por puntos
+            leaderboard.sort((a, b) => b.points - a.points);
+            
+            if (leaderboard.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <p>📊 Los resultados aparecerán aquí una vez que haya predicciones</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            leaderboard.forEach((participant, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                html += `
+                    <div class="leaderboard-item">
+                        <div class="position">${medal}</div>
+                        <div class="participant-name">${participant.name}</div>
+                        <div class="points">${participant.points} pts</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateMatchesList() {
+            if (!isAdmin) return;
+            
+            const container = document.getElementById('matchesList');
+            if (!container) return;
+            
+            const matchesArray = Object.values(matches).sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (matchesArray.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No hay partidos programados</p>';
+                return;
+            }
+            
+            let html = '';
+            matchesArray.forEach(match => {
+                html += `
+                    <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <strong>${match.jornada}</strong>
+                            <button onclick="deleteMatch(${match.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Eliminar</button>
+                        </div>
+                        <div>${match.homeTeam} vs ${match.awayTeam}</div>
+                        <div style="font-size: 14px; color: #666;">${new Date(match.date).toLocaleString()} | ${match.type}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateAdminResultsDisplay() {
+            if (!isAdmin) return;
+            
+            const container = document.getElementById('adminMatchesList');
+            if (!container) return;
+            
+            const matchesArray = Object.values(matches).sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (matchesArray.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No hay partidos para actualizar</p>';
+                return;
+            }
+            
+            let html = '';
+            matchesArray.forEach(match => {
+                html += `
+                    <div style="background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <div style="margin-bottom: 15px;">
+                            <strong>${match.jornada}</strong><br>
+                            <div style="font-size: 16px; margin: 5px 0;">${match.homeTeam} vs ${match.awayTeam}</div>
+                            <div style="font-size: 14px; color: #666;">${new Date(match.date).toLocaleString()}</div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: center;">
+                            <div>
+                                <label>${match.homeTeam}:</label>
+                                <input type="number" id="homeScore_${match.id}" min="0" max="20" 
+                                       value="${match.homeScore || ''}" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div>
+                                <label>${match.awayTeam}:</label>
+                                <input type="number" id="awayScore_${match.id}" min="0" max="20" 
+                                       value="${match.awayScore || ''}"
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            ${match.type === 'eliminacion' ? `
+                                <div>
+                                    <label>
+                                        <input type="checkbox" id="extraTime_${match.id}" ${match.extraTime ? 'checked' : ''}>
+                                        Alargue
+                                    </label>
+                                </div>
+                            ` : '<div></div>'}
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <button onclick="updateMatchResult(${match.id})" class="btn btn-secondary">Actualizar Resultado</button>
+                            <select onchange="updateMatchStatus(${match.id}, this.value)" style="margin-left: 10px; padding: 8px;">
+                                <option value="upcoming" ${match.status === 'upcoming' ? 'selected' : ''}>Próximo</option>
+                                <option value="live" ${match.status === 'live' ? 'selected' : ''}>En Vivo</option>
+                                <option value="finished" ${match.status === 'finished' ? 'selected' : ''}>Finalizado</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Funciones de predicciones y puntos
+        function savePrediction(matchId, type, value) {
+            if (!currentUser) return;
+            
+            if (!participants[currentUser].predictions[matchId]) {
+                participants[currentUser].predictions[matchId] = {};
+            }
+            
+            if (type === 'home') {
+                participants[currentUser].predictions[matchId].homeScore = parseInt(value) || 0;
+            } else if (type === 'away') {
+                participants[currentUser].predictions[matchId].awayScore = parseInt(value) || 0;
+            } else if (type === 'extraTime') {
+                participants[currentUser].predictions[matchId].extraTime = value;
+            }
+            
+            // Guardar en Google Sheets si está conectado
+            savePredictionToSheets(currentUser, matchId, participants[currentUser].predictions[matchId]);
+        }
+
+        function calculateMatchPoints(match, prediction) {
+            if (!match || !prediction || match.homeScore === null || match.awayScore === null) {
+                return 0;
+            }
+            
+            let points = 0;
+            const actualHomeScore = match.homeScore;
+            const actualAwayScore = match.awayScore;
+            const predHomeScore = prediction.homeScore;
+            const predAwayScore = prediction.awayScore;
+            
+            // Resultado exacto
+            if (predHomeScore === actualHomeScore && predAwayScore === actualAwayScore) {
+                points += match.type === 'eliminacion' ? 5 : 3;
+            }
+            // Tendencia correcta (ganador o empate)
+            else if (
+                (predHomeScore > predAwayScore && actualHomeScore > actualAwayScore) ||
+                (predHomeScore < predAwayScore && actualHomeScore < actualAwayScore) ||
+                (predHomeScore === predAwayScore && actualHomeScore === actualAwayScore)
+            ) {
+                points += match.type === 'eliminacion' ? 3 : 1;
+            }
+            
+            // Bonus por alargue correcto en eliminación
+            if (match.type === 'eliminacion' && prediction.extraTime === match.extraTime) {
+                points += 1;
+            }
+            
+            return points;
+        }
+
+        // Funciones de administración
+        function deleteMatch(matchId) {
+            if (!isAdmin) return;
+            
+            if (confirm('¿Estás seguro de que quieres eliminar este partido?')) {
+                delete matches[matchId];
+                
+                // Eliminar predicciones asociadas
+                Object.values(participants).forEach(participant => {
+                    if (participant.predictions[matchId]) {
+                        delete participant.predictions[matchId];
+                    }
+                });
+                
+                refreshMatchesDisplay();
+                showAlert('adminAlert', 'Partido eliminado exitosamente', 'success');
+            }
+        }
+
+        function updateMatchResult(matchId) {
+            if (!isAdmin) return;
+            
+            const homeScore = parseInt(document.getElementById(`homeScore_${matchId}`).value);
+            const awayScore = parseInt(document.getElementById(`awayScore_${matchId}`).value);
+            const extraTime = document.getElementById(`extraTime_${matchId}`) ? 
+                             document.getElementById(`extraTime_${matchId}`).checked : false;
+            
+            if (isNaN(homeScore) || isNaN(awayScore)) {
+                showAlert('adminAlert', 'Por favor ingresa resultados válidos', 'error');
+                return;
+            }
+            
+            matches[matchId].homeScore = homeScore;
+            matches[matchId].awayScore = awayScore;
+            matches[matchId].extraTime = extraTime;
+            matches[matchId].status = 'finished';
+            
+            showAlert('adminAlert', 'Resultado actualizado exitosamente', 'success');
+            refreshMatchesDisplay();
+            updateLeaderboard();
+        }
+
+        function updateMatchStatus(matchId, status) {
+            if (!isAdmin) return;
+            
+            matches[matchId].status = status;
+            refreshMatchesDisplay();
+        }
+
+        function updateAllResults() {
+            if (!isAdmin) return;
+            
+            let updated = 0;
+            Object.keys(matches).forEach(matchId => {
+                const homeScoreInput = document.getElementById(`homeScore_${matchId}`);
+                const awayScoreInput = document.getElementById(`awayScore_${matchId}`);
+                
+                if (homeScoreInput && awayScoreInput) {
+                    const homeScore = parseInt(homeScoreInput.value);
+                    const awayScore = parseInt(awayScoreInput.value);
+                    
+                    if (!isNaN(homeScore) && !isNaN(awayScore)) {
+                        matches[matchId].homeScore = homeScore;
+                        matches[matchId].awayScore = awayScore;
+                        
+                        const extraTimeInput = document.getElementById(`extraTime_${matchId}`);
+                        if (extraTimeInput) {
+                            matches[matchId].extraTime = extraTimeInput.checked;
+                        }
+                        
+                        matches[matchId].status = 'finished';
+                        updated++;
+                    }
+                }
+            });
+            
+            if (updated > 0) {
+                showAlert('adminAlert', `${updated} resultados actualizados exitosamente`, 'success');
+                refreshMatchesDisplay();
+                updateLeaderboard();
+            } else {
+                showAlert('adminAlert', 'No hay resultados para actualizar', 'error');
+            }
+        }
+
+        // Funciones auxiliares
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            container.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        function updateConnectionStatus(message, color) {
+            const status = document.getElementById('connectionStatus');
+            if (status) {
+                status.textContent = message;
+                status.style.color = color;
+            }
+        }
+
+        function refreshMatchesDisplay() {
+            updatePredictionsDisplay();
+            if (isAdmin) {
+                updateMatchesList();
+                updateAdminResultsDisplay();
+            }
+        }
+
+        // Funciones de Google Sheets
+        async function loadDataFromSheets() {
+            try {
+                // Cargar participantes
+                const participantsData = await readFromSheet('Participantes!A:D');
+                if (participantsData && participantsData.length > 1) {
+                    participantsData.slice(1).forEach(row => {
+                        if (row[0] && row[1]) {
+                            participants[row[0]] = {
+                                name: row[1],
+                                points: parseInt(row[2]) || 0,
+                                predictions: {}
+                            };
+                        }
+                    });
+                }
+                
+                // Cargar partidos
+                const matchesData = await readFromSheet('Partidos!A:I');
+                if (matchesData && matchesData.length > 1) {
+                    matchesData.slice(1).forEach(row => {
+                        if (row[0]) {
+                            const matchId = parseInt(row[0]);
+                            matches[matchId] = {
+                                id: matchId,
+                                jornada: row[1] || '',
+                                homeTeam: row[2] || '',
+                                awayTeam: row[3] || '',
+                                date: row[4] || '',
+                                type: row[5] || 'regular',
+                                homeScore: row[6] ? parseInt(row[6]) : null,
+                                awayScore: row[7] ? parseInt(row[7]) : null,
+                                extraTime: row[8] === 'TRUE',
+                                status: 'upcoming'
+                            };
+                            
+                            if (matchId > matchCounter) {
+                                matchCounter = matchId;
+                            }
+                        }
+                    });
+                }
+                
+                // Cargar predicciones
+                const predictionsData = await readFromSheet('Predicciones!A:E');
+                if (predictionsData && predictionsData.length > 1) {
+                    predictionsData.slice(1).forEach(row => {
+                        if (row[0] && row[1] && participants[row[0]]) {
+                            const participantCode = row[0];
+                            const matchId = parseInt(row[1]);
+                            
+                            if (!participants[participantCode].predictions[matchId]) {
+                                participants[participantCode].predictions[matchId] = {};
+                            }
+                            
+                            participants[participantCode].predictions[matchId] = {
+                                homeScore: parseInt(row[2]) || 0,
+                                awayScore: parseInt(row[3]) || 0,
+                                extraTime: row[4] === 'TRUE'
+                            };
+                        }
+                    });
+                }
+                
+                console.log('Datos cargados desde Google Sheets');
+                refreshMatchesDisplay();
+                
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        }
+
+        async function saveParticipantToSheets(code, name) {
+            if (!sheets_connected) return;
+            
+            try {
+                // Buscar si ya existe
+                const data = await readFromSheet('Participantes!A:A');
+                let row = data ? data.length + 1 : 2;
+                
+                if (data) {
+                    for (let i = 1; i < data.length; i++) {
+                        if (data[i][0] === code) {
+                            row = i + 1;
+                            break;
+                        }
+                    }
+                }
+                
+                await writeToSheet(`Participantes!A${row}:D${row}`, [[code, name, 0, new Date().toISOString()]]);
+            } catch (error) {
+                console.error('Error guardando participante:', error);
+            }
+        }
+
+        async function saveMatchToSheets(matchId) {
+            if (!gis_inited) return;
+            
+            try {
+                const match = matches[matchId];
+                const data = await readFromSheet('Partidos!A:A');
+                const row = data ? data.length + 1 : 2;
+                
+                await writeToSheet(`Partidos!A${row}:I${row}`, [[
+                    match.id,
+                    match.jornada,
+                    match.homeTeam,
+                    match.awayTeam,
+                    match.date,
+                    match.type,
+                    match.homeScore || '',
+                    match.awayScore || '',
+                    match.extraTime ? 'TRUE' : 'FALSE'
+                ]]);
+            } catch (error) {
+                console.error('Error guardando partido:', error);
+            }
+        }
+
+        async function savePredictionToSheets(participantCode, matchId, prediction) {
+            if (!sheets_connected) return;
+            
+            try {
+                // Buscar si ya existe la predicción
+                const data = await readFromSheet('Predicciones!A:B');
+                let row = data ? data.length + 1 : 2;
+                
+                if (data) {
+                    for (let i = 1; i < data.length; i++) {
+                        if (data[i][0] === participantCode && parseInt(data[i][1]) === matchId) {
+                            row = i + 1;
+                            break;
+                        }
+                    }
+                }
+                
+                await writeToSheet(`Predicciones!A${row}:E${row}`, [[
+                    participantCode,
+                    matchId,
+                    prediction.homeScore || 0,
+                    prediction.awayScore || 0,
+                    prediction.extraTime ? 'TRUE' : 'FALSE'
+                ]]);
+            } catch (error) {
+                console.error('Error guardando predicción:', error);
+            }
+        }
+
+        // Partidos de ejemplo
+        function initializeDefaultMatches() {
+            const defaultMatches = [
+                {
+                    jornada: "Cuartos de Final - Ida",
+                    homeTeam: "BARCELONA",
+                    awayTeam: "PSG",
+                    date: "2025-06-15T20:00",
+                    type: "eliminacion"
+                },
+                {
+                    jornada: "Cuartos de Final - Ida", 
+                    homeTeam: "REAL MADRID",
+                    awayTeam: "MANCHESTER CITY",
+                    date: "2025-06-16T20:00", 
+                    type: "eliminacion"
+                },
+                {
+                    jornada: "Cuartos de Final - Vuelta",
+                    homeTeam: "PSG", 
+                    awayTeam: "BARCELONA",
+                    date: "2025-06-22T20:00",
+                    type: "eliminacion"
+                }
+            ];
+            
+            defaultMatches.forEach(match => {
+                addMatch(match.jornada, match.homeTeam, match.awayTeam, match.date, match.type);
+            });
+        }
+
+        // Inicializar app con conexión automática
+        window.onload = function() {
+            console.log('🚀 Iniciando Quiniela Champions...');
+            updateConnectionStatus('🔄 Cargando APIs de Google...', '#ffc107');
+            
+            // Cargar partidos de ejemplo después de un tiempo si no hay conexión
+            setTimeout(() => {
+                if (!sheets_connected) {
+                    console.log('📝 Cargando partidos de ejemplo...');
+                    initializeDefaultMatches();
+                    refreshMatchesDisplay();
+                    updateConnectionStatus('⚠️ Modo local - Solo para pruebas', '#ffc107');
+                }
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
